@@ -11,7 +11,6 @@ for row in csv.DictReader(open('godinfos.csv','r'),delimiter='\t',fieldnames=fie
             row[key] = ''
     gods_dicts.append(row)
 used_names = []
-exit_now = False
 
 def read_csv_lines(filename, target_list, force_print_error=False):
     global debug
@@ -104,46 +103,46 @@ def print_available_names():
 
 def menu_pick_new_name():
     actions = OrderedDict(
-
+        r=('random suggestion'
     )
 
 
-def edit_used_name_entry():
+def menu_edit_used_name_entry():
     pass
 
-def print_actions(menu_name_and_actions):
-    menu_name = menu_name_and_actions[0]
-    actions = menu_name_and_actions[1]
+def print_actions(menu_name, actions):
     print('(%s) Available options:' % menu_name)
     for action in actions.items():
         print(action[0] + '\t' + action[1][0])
+    return False
 
-def show_menu(menu_name, actions)
+def show_menu(menu_name, actions, return_val=False)
     actions_cpy = actions.copy()
-    actions_cpy['?'] = ('show this help', print_actions, (menu_name, actions))
+    actions_cpy['?'] = ('show this help', print_actions, [menu_name, actions])
     user_input = ''
     exit_menu = False
-    while not exit_menu:
+    # is not True to catch 'None' as well
+    while exit_menu is not True:
         print('(%s) What would you like to do? press ? to show available actions' % menu_name)
         if user_input not in actions:
             print('(%s) unrecognised action, try again. Your input should usually be a single character followed by return' % menu_name)
         user_input = sys.stdin.readline().strip()
-    action = actions[user_input]
-    action[1](action[2])
+        action = actions[user_input]
+        exit_menu = action[1](*action[2])
+    return return_val
+
 
 
 def menu_main():
-    global exit_now
     actions =  OrderedDict(
-        u=('Print used names', print_used_names, False),
-        i=('get used names + associated system info', print_used_names, True),
-        a=('print available names', print_available_names, None),
-        n=('pick a new name and add it to the use list', menu_pick_new_name(), None),
-         e=('edit or delete an entry in the used list', edit_used_name_entry(), None),
-        q=('quit', exit, 0)
+        u=('Print used names', print_used_names, [False]),
+        i=('get used names + associated system info', print_used_names, [True]),
+        a=('print available names', print_available_names, []),
+        n=('pick a new name and add it to the use list', menu_pick_new_name(), []),
+        e=('edit or delete an entry in the used list', menu_edit_used_name_entry(), []),
+        q=('quit', lambda a: a, [True])
     )
-    while not exit_now:
-        show_menu('main menu', actions)
+    show_menu('main menu', actions)
 
 
 if __name__ == '__main__':
