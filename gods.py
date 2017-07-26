@@ -143,10 +143,10 @@ def get_user_values(menu_name, values):
         values[key] = sys.stdin.readline().strip()
     print('done!')
 
-def menu_confirm_values(menu_name, values, refresh_values_func, return_val=True):
+def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False):
     refresh_values_func(menu_name, values)
     print('(%s) Please confirm the following values:' % menu_name)
-    for key, value in values:
+    for key, value in values.items():
         print('%s: %s' % (key, value))
     print('Are these values correct?')
     actions = OrderedDict(
