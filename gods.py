@@ -3,17 +3,19 @@ from __future__ import print_function
 import sys, csv, random
 from copy import deepcopy
 from collections import OrderedDict
+
 debug = True
 
 fields = ['Greek', 'Greek Romanized', 'Roman', 'Roman Anglicized', 'Etruscan', 'Egyptian', 'Description']
 gods_dicts = []
-for row in csv.DictReader(open('godinfos.csv','r'),delimiter='\t',fieldnames=fields, skipinitialspace=True):
+for row in csv.DictReader(open('godinfos.csv', 'r'), delimiter='\t', fieldnames=fields, skipinitialspace=True):
     # replace empty fields with empty strings
     for key in row.keys():
         if row[key] is None:
             row[key] = ''
     gods_dicts.append(row)
 used_names = []
+
 
 def read_csv_lines(filename, target_list, force_print_error=False):
     global debug
@@ -28,6 +30,7 @@ def read_csv_lines(filename, target_list, force_print_error=False):
         print('Error reading %s: %s' % (filename, type(err)))
         if force_print_error or debug:
             print(err)
+
 
 def read_lines(filename, target_list, force_print_error=False):
     global debug
@@ -51,8 +54,8 @@ def find_god_dict(name):
 
 def generate_god_info_lines(god_dict):
     lines = ['Name: %s (%s)' % (god_dict['Greek Romanized'], god_dict['Greek']),
-             #'Roman: %s%s' % ("" if god_dict['Roman Anglicized'].strip() == "" else '%s / ' % god_dict['Roman Anglicized'], god_dict['Roman'])
-    '']
+             # 'Roman: %s%s' % ("" if god_dict['Roman Anglicized'].strip() == "" else '%s / ' % god_dict['Roman Anglicized'], god_dict['Roman'])
+             '']
     for field in fields[2:]:
         stripped_content = god_dict[field].strip()
         if stripped_content != "":
@@ -80,7 +83,7 @@ def print_used_names(print_annotations):
     if print_annotations:
         print('Name\tAnnotation')
     for line in used_names:
-        print(line[0].strip() + ('\t'+' '.join(line[1:]) if print_annotations else ''))
+        print(line[0].strip() + ('\t' + ' '.join(line[1:]) if print_annotations else ''))
 
 
 def find_available_names():
@@ -106,6 +109,7 @@ def print_available_names():
 def menu_edit_used_name_entry():
     pass
 
+
 def print_actions(menu_name, actions):
     print('Menu "%s"\nAvailable actions:' % menu_name)
     print('Key\tDescription')
@@ -113,6 +117,7 @@ def print_actions(menu_name, actions):
     for action_key, action_parameters in actions.items():
         print(action_key + '\t' + action_parameters[0])
     return False
+
 
 def show_menu(menu_name, actions, add_return_option=True, return_val=False):
     if debug:
@@ -128,7 +133,8 @@ def show_menu(menu_name, actions, add_return_option=True, return_val=False):
         print('(%s) > ' % menu_name, end="")
         user_input = sys.stdin.readline().strip()
         if user_input not in actions_cpy:
-            print('(%s) unrecognised action, try again. Your input should usually be a single character followed by return' % menu_name)
+            if user_input:
+                print('(%s) unrecognised action, try again. Type ? for help' % menu_name)
         else:
             action = actions_cpy[user_input]
             exit_menu = action[1](*action[2])
@@ -136,12 +142,13 @@ def show_menu(menu_name, actions, add_return_option=True, return_val=False):
 
 
 def get_user_values(menu_name, values):
-    #values should be a (dummy)-prefilled OrderedDict
+    # values should be a (dummy)-prefilled OrderedDict
     print('(%s) Please enter some information:' % menu_name)
     for key in values.keys:
         print('%s:' % key)
         values[key] = sys.stdin.readline().strip()
     print('done!')
+
 
 def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False):
     refresh_values_func(menu_name, values)
@@ -150,10 +157,10 @@ def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False
         print('%s: %s' % (key, value))
     print('Are these values correct?')
     actions = OrderedDict(
-        y=('yes', lambda b: b, [True]), # FIXME follow up with actual data entry dialog
-        n = ('no, try again',menu_confirm_values,[menu_name, values, refresh_values_func, True, return_val])
+        y=('yes', lambda b: b, [True]),  # FIXME follow up with actual data entry dialog
+        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, True, return_val])
     )
-    show_menu(menu_name+'/Confirm', actions)
+    show_menu(menu_name + '/Confirm', actions)
     return return_val
 
 
@@ -165,16 +172,17 @@ def get_random_suggestion(menu_name, results):
     god_nr = random.randint(1, len(available))
     if debug:
         print('Random suggestion: #%i out of %i available' % (god_nr, len(available)))
-    #print('\n'.join(generate_god_info_lines(available[god_nr - 1])))
+    # print('\n'.join(generate_god_info_lines(available[god_nr - 1])))
     for key, value in available[god_nr - 1].items():
         results[key] = value
 
+
 PICK_NEW_NAME_ACTIONS = OrderedDict(
-    r=('get a random suggestion for a name', menu_confirm_values, ['random suggestion', OrderedDict(), get_random_suggestion])
+    r=('get a random suggestion for a name', menu_confirm_values,
+       ['random suggestion', OrderedDict(), get_random_suggestion])
 )
 
 EDIT_USED_NAME_ACTIONS = OrderedDict()
-
 
 
 # end of menu declarations
@@ -188,7 +196,7 @@ def menu_main():
         p=('get used names + associated system info', print_used_names, [True]),
         a=('print available names', print_available_names, []),
         n=('pick a new name and add it to the use list', show_menu, ['Pick Name', PICK_NEW_NAME_ACTIONS]),
-        e=('DUMMY edit or delete an entry in the used name list',  show_menu, ['Edit Used', EDIT_USED_NAME_ACTIONS]),
+        e=('DUMMY edit or delete an entry in the used name list', show_menu, ['Edit Used', EDIT_USED_NAME_ACTIONS]),
         q=('quit', lambda a: a, [True])
     )
     show_menu('Main', actions, add_return_option=False)
