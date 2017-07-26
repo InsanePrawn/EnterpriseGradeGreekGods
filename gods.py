@@ -150,7 +150,7 @@ def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False
         print('%s: %s' % (key, value))
     print('Are these values correct?')
     actions = OrderedDict(
-        y=('yes', lambda b: b, [True]),
+        y=('yes', lambda b: b, [True]), # FIXME follow up with actual data entry dialog
         n = ('no, try again',menu_confirm_values,[menu_name, values, refresh_values_func, True, return_val])
     )
     show_menu(menu_name+'/Confirm', actions)
@@ -188,7 +188,7 @@ def menu_main():
         p=('get used names + associated system info', print_used_names, [True]),
         a=('print available names', print_available_names, []),
         n=('pick a new name and add it to the use list', show_menu, ['Pick Name', PICK_NEW_NAME_ACTIONS]),
-        e=('edit or delete an entry in the used name list',  show_menu, ['Edit Used', EDIT_USED_NAME_ACTIONS]),
+        e=('DUMMY edit or delete an entry in the used name list',  show_menu, ['Edit Used', EDIT_USED_NAME_ACTIONS]),
         q=('quit', lambda a: a, [True])
     )
     show_menu('Main', actions, add_return_option=False)
