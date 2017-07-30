@@ -22,7 +22,7 @@ def read_csv_lines(filename, target_list, force_print_error=False):
     try:
         for row in csv.reader(open(filename, 'r'), delimiter='\t'):
             # replace empty fields with empty strings
-            for i, obj in row:
+            for i, obj in enumerate(row):
                 if obj is None:
                     row[i] = ''
             target_list.append(row)
@@ -81,9 +81,10 @@ def print_random_god():
 def print_used_names(print_annotations):
     global used_names
     if print_annotations:
-        print('Name\tAnnotation')
+        print('\nName\tAnnotation')
     for line in used_names:
         print(line[0].strip() + ('\t' + ' '.join(line[1:]) if print_annotations else ''))
+    return False
 
 
 def find_available_names():
@@ -131,6 +132,7 @@ def show_menu(menu_name, actions, add_return_option=True, return_val=False):
     print('(%s) What would you like to do? press ? to show available actions' % menu_name)
     while exit_menu is not True:
         print('(%s) > ' % menu_name, end="")
+        sys.stdout.flush()
         user_input = sys.stdin.readline().strip()
         if user_input not in actions_cpy:
             if user_input:
