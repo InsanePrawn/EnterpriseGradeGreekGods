@@ -101,8 +101,8 @@ def find_available_names():
     to_check = deepcopy(used_names)
     for god in gods_dicts:
         taken = False
-        for i, name in to_check:
-            if name.lower() in god['Greek Romanized'].lower():
+        for name in to_check:
+            if name[0].lower() in god['Greek Romanized'].lower():
                 taken = True
                 to_check.pop(i)
                 break
@@ -170,7 +170,7 @@ def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False
     print('Are these values correct?')
     actions = OrderedDict(
         y=('yes', lambda b: b, [True]),  # FIXME follow up with actual data entry dialog
-        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, True, return_val])
+        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, return_val])
     )
     show_menu(menu_name + '/Confirm', actions)
     return return_val
