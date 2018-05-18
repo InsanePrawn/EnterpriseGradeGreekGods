@@ -27,7 +27,7 @@ def read_csv_lines(filename, target_list, force_print_error=False):
     try:
         for row in csv.reader(open(filename, 'r'), delimiter='\t'):
             # replace empty fields with empty strings
-            for i, obj in row:
+            for i, obj in enumerate(row):
                 if obj is None:
                     row[i] = ''
             target_list.append(row)
@@ -91,7 +91,8 @@ def print_used_names(print_annotations):
     if print_annotations:
         print('Name\tAnnotation')
     for line in used_names:
-        print(line[0] + ('\t' + ' '.join(line[1:]) if print_annotations else ''))
+        print(line[0].strip() + ('\t' + ' '.join(line[1:]) if print_annotations else ''))
+    return False
 
 
 def find_available_names():
@@ -100,8 +101,8 @@ def find_available_names():
     to_check = deepcopy(used_names)
     for god in gods_dicts:
         taken = False
-        for i, name in to_check:
-            if name.lower() in god['Greek Romanized'].lower():
+        for name in to_check:
+            if name[0].lower() in god['Greek Romanized'].lower():
                 taken = True
                 to_check.pop(i)
                 break
@@ -169,7 +170,7 @@ def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False
     print('Are these values correct?')
     actions = OrderedDict(
         y=('yes', lambda b: b, [True]),  # FIXME follow up with actual data entry dialog
-        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, True, return_val])
+        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, return_val])
     )
     show_menu(menu_name + '/Confirm', actions)
     return return_val
