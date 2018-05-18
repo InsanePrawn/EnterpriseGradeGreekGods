@@ -6,6 +6,12 @@ from collections import OrderedDict
 
 debug = True
 
+def strequal(a, b):
+    return a.casefold() == b.casefold()
+
+def strinstr(a, b):
+    return a.casefold() in b.casefold()
+
 fields = ['Greek', 'Greek Romanized', 'Roman', 'Roman Anglicized', 'Etruscan', 'Egyptian', 'Description']
 gods_dicts = []
 for row in csv.DictReader(open('godinfos.csv', 'r'), delimiter='\t', fieldnames=fields, skipinitialspace=True):
@@ -15,7 +21,6 @@ for row in csv.DictReader(open('godinfos.csv', 'r'), delimiter='\t', fieldnames=
             row[key] = ''
     gods_dicts.append(row)
 used_names = []
-
 
 def read_csv_lines(filename, target_list, force_print_error=False):
     global debug
@@ -45,10 +50,13 @@ def read_lines(filename, target_list, force_print_error=False):
             print(err)
 
 
-def find_god_dict(name):
+def find_god_dict(_name):
+    global gods_dicts, fields
     for god in gods_dicts:
-        if name.lower() in god['Greek Romanized'].lower():
-            return god
+        name = _name.lower()
+        for field in fields[:-1]: #exclude the description
+            if strinstr(name, god[field]):
+                return god
     return None
 
 
@@ -83,7 +91,7 @@ def print_used_names(print_annotations):
     if print_annotations:
         print('Name\tAnnotation')
     for line in used_names:
-        print(line[0].strip() + ('\t' + ' '.join(line[1:]) if print_annotations else ''))
+        print(line[0] + ('\t' + ' '.join(line[1:]) if print_annotations else ''))
 
 
 def find_available_names():
@@ -128,16 +136,19 @@ def show_menu(menu_name, actions, add_return_option=True, return_val=False):
         actions_cpy['b'] = ('exit this menu', lambda b: b, [True])
     exit_menu = False
     # is not True to catch 'None' as well
-    print('(%s) What would you like to do? press ? to show available actions' % menu_name)
+    print('(%s) What would you like to do? Press "?" to show available actions' % menu_name)
     while exit_menu is not True:
         print('(%s) > ' % menu_name, end="")
+        sys.stdout.flush()
         user_input = sys.stdin.readline().strip()
         if user_input not in actions_cpy:
             if user_input:
                 print('(%s) unrecognised action, try again. Type ? for help' % menu_name)
+                sys.stdout.flush()
         else:
             action = actions_cpy[user_input]
             exit_menu = action[1](*action[2])
+            sys.stdout.flush()
     return return_val
 
 
@@ -205,10 +216,10 @@ def menu_main():
 if __name__ == '__main__':
     names = []
     if len(sys.argv) > 1:
-        argument = sys.argv[1].strip().lower()
+        argument = sys.argv[1].strip()
         if len(argument) > 1:
-            if argument.endswith('.txt'):
-                names = open(sys.argv[1], 'r').readlines()
+            if argument.lower().endswith('.txt'):
+                names = [line.strip() for line in open(sys.argv[1], 'r').readlines()]
             else:
                 names = [argument]
             for name in names:
@@ -220,6 +231,9 @@ if __name__ == '__main__':
             print('no proper argument given.'
                   'either input nothing, a single name or the path to a text file (name ending with .txt!) with names')
     else:
-        read_csv_lines('used_names.csv', used_names)
+        try:
+            used_names = [line.strip().split(' ') for line in open('used.txt', 'r').readlines()]
+        except Exception as err:
+            print('Error opening or parsing used.txt%s' % (':\n' + err.__str__() if debug else ''))
 
         menu_main()
