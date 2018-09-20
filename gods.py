@@ -20,7 +20,7 @@ for row in csv.DictReader(open('godinfos.csv', 'r'), delimiter='\t', fieldnames=
         if row[key] is None:
             row[key] = ''
     gods_dicts.append(row)
-used_names = []
+used_gods = []
 
 def read_csv_lines(filename, target_list, force_print_error=False):
     global debug
@@ -87,22 +87,22 @@ def print_random_god():
 
 
 def print_used_names(print_annotations):
-    global used_names
+    global used_gods
     if print_annotations:
         print('\nName\tAnnotation')
-    for line in used_names:
+    for line in used_gods:
         print(line[0].strip() + ('\t' + ' '.join(line[1:]) if print_annotations else ''))
     return False
 
 
 def find_available_names():
-    global used_names
+    global used_gods
     global gods_dicts
-    to_check = deepcopy(used_names)
+    to_check = deepcopy(used_gods)
     for god in gods_dicts:
         taken = False
-        for name in to_check:
-            if name[0].lower() in god['Greek Romanized'].lower():
+        for i, used_god in enumerate(to_check):
+            if used_god[0].lower() in god['Greek Romanized'].lower():
                 taken = True
                 #to_check.pop(i)
                 break
@@ -170,7 +170,7 @@ def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False
     print('Are these values correct?')
     actions = OrderedDict(
         y=('yes', lambda b: b, [True]),  # FIXME follow up with actual data entry dialog
-        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, False])
+        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, True])
     )
     show_menu(menu_name + '/Confirm', actions)
     return return_val
@@ -192,7 +192,7 @@ def get_random_suggestion(menu_name, results):
 PICK_NEW_NAME_ACTIONS = OrderedDict(
     #TODO: add 'insert new used name' dialog
     r=('get a random suggestion for a name', menu_confirm_values,
-       ['random suggestion', OrderedDict(), get_random_suggestion])
+       ['random suggestion', OrderedDict(), get_random_suggestion, False])
 )
 
 EDIT_USED_NAME_ACTIONS = OrderedDict()
@@ -233,9 +233,6 @@ if __name__ == '__main__':
             print('no proper argument given.'
                   'either input nothing, a single name or the path to a text file (name ending with .txt!) with names')
     else:
-        try:
-            used_names = [line.strip().split(' ') for line in open('used.txt', 'r').readlines()]
-        except Exception as err:
-            print('Error opening or parsing used.txt%s' % (':\n' + err.__str__() if debug else ''))
+        read_csv_lines('used_names.csv', used_gods)
 
         menu_main()
