@@ -104,7 +104,7 @@ def find_available_names():
         for name in to_check:
             if name[0].lower() in god['Greek Romanized'].lower():
                 taken = True
-                to_check.pop(i)
+                #to_check.pop(i)
                 break
         if not taken:
             yield god
@@ -112,7 +112,7 @@ def find_available_names():
 
 def print_available_names():
     for god in find_available_names():
-        print(god['Greek Romanized'])
+        print('"%s", "%s": %s' % (god['Greek Romanized'].strip(), god['Roman'].strip(), god['Description'].strip()))
 
 
 def menu_edit_used_name_entry():
@@ -170,7 +170,7 @@ def menu_confirm_values(menu_name, values, refresh_values_func, return_val=False
     print('Are these values correct?')
     actions = OrderedDict(
         y=('yes', lambda b: b, [True]),  # FIXME follow up with actual data entry dialog
-        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, return_val])
+        n=('no, try again', menu_confirm_values, [menu_name, values, refresh_values_func, False])
     )
     show_menu(menu_name + '/Confirm', actions)
     return return_val
@@ -190,6 +190,7 @@ def get_random_suggestion(menu_name, results):
 
 
 PICK_NEW_NAME_ACTIONS = OrderedDict(
+    #TODO: add 'insert new used name' dialog
     r=('get a random suggestion for a name', menu_confirm_values,
        ['random suggestion', OrderedDict(), get_random_suggestion])
 )
